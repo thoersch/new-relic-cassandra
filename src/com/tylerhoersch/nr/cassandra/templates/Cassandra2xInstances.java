@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Cassandra2xInstances implements JMXTemplate<List<String>> {
+    @SuppressWarnings("unchecked")
     @Override
     public List<String> execute(MBeanServerConnection connection, JMXRunner jmxRunner) throws Exception {
         List<String> instances = new ArrayList<>();

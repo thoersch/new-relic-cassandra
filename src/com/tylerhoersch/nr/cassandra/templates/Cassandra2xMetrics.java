@@ -39,6 +39,9 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
     private static final String ROW_CACHE_ENTRIES_GLOBAL = "Cassandra/global/Cache/RowCache/Entries";
 
     private static final String MILLIS = "millis";
+    private static final String RATE = "rate";
+    private static final String BYTES = "bytes";
+    private static final String COUNT = "count";
 
     private final String instance;
 
@@ -62,28 +65,28 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
         List<Metric> metrics = new ArrayList<>();
 
         BigDecimal keyCacheHitRate = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "HitRate", "Cache", "KeyCache", "Value");
-        metrics.add(new Metric(String.format(KEY_CACHE_HIT_RATE_INSTANCE, instance), "rate", keyCacheHitRate));
-        metrics.add(new Metric(KEY_CACHE_HIT_RATE_GLOBAL, "rate", keyCacheHitRate));
+        metrics.add(new Metric(String.format(KEY_CACHE_HIT_RATE_INSTANCE, instance), RATE, keyCacheHitRate));
+        metrics.add(new Metric(KEY_CACHE_HIT_RATE_GLOBAL, RATE, keyCacheHitRate));
 
         Long keyCacheSize = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Size", "Cache", "KeyCache", "Value");
-        metrics.add(new Metric(String.format(KEY_CACHE_SIZE_INSTANCE, instance), "bytes", keyCacheSize));
-        metrics.add(new Metric(KEY_CACHE_SIZE_GLOBAL, "bytes", keyCacheSize));
+        metrics.add(new Metric(String.format(KEY_CACHE_SIZE_INSTANCE, instance), BYTES, keyCacheSize));
+        metrics.add(new Metric(KEY_CACHE_SIZE_GLOBAL, BYTES, keyCacheSize));
 
         Integer keyCacheEntries = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Entries", "Cache", "KeyCache", "Value");
-        metrics.add(new Metric(String.format(KEY_CACHE_ENTRIES_INSTANCE, instance), "count", keyCacheEntries));
-        metrics.add(new Metric(KEY_CACHE_ENTRIES_GLOBAL, "count", keyCacheEntries));
+        metrics.add(new Metric(String.format(KEY_CACHE_ENTRIES_INSTANCE, instance), COUNT, keyCacheEntries));
+        metrics.add(new Metric(KEY_CACHE_ENTRIES_GLOBAL, COUNT, keyCacheEntries));
 
         BigDecimal rowCacheHitRate = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "HitRate", "Cache", "RowCache", "Value");
-        metrics.add(new Metric(String.format(ROW_CACHE_HIT_RATE_INSTANCE, instance), "rate", rowCacheHitRate));
-        metrics.add(new Metric(ROW_CACHE_HIT_RATE_GLOBAL, "rate", rowCacheHitRate));
+        metrics.add(new Metric(String.format(ROW_CACHE_HIT_RATE_INSTANCE, instance), RATE, rowCacheHitRate));
+        metrics.add(new Metric(ROW_CACHE_HIT_RATE_GLOBAL, RATE, rowCacheHitRate));
 
         Long rowCacheSize = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Size", "Cache", "RowCache", "Value");
-        metrics.add(new Metric(String.format(ROW_CACHE_SIZE_INSTANCE, instance), "bytes", rowCacheSize));
-        metrics.add(new Metric(ROW_CACHE_SIZE_GLOBAL, "bytes", rowCacheSize));
+        metrics.add(new Metric(String.format(ROW_CACHE_SIZE_INSTANCE, instance), BYTES, rowCacheSize));
+        metrics.add(new Metric(ROW_CACHE_SIZE_GLOBAL, BYTES, rowCacheSize));
 
         Integer rowCacheEntries = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Entries", "Cache", "RowCache", "Value");
-        metrics.add(new Metric(String.format(ROW_CACHE_ENTRIES_INSTANCE, instance), "count", rowCacheEntries));
-        metrics.add(new Metric(ROW_CACHE_ENTRIES_GLOBAL, "count", rowCacheEntries));
+        metrics.add(new Metric(String.format(ROW_CACHE_ENTRIES_INSTANCE, instance), COUNT, rowCacheEntries));
+        metrics.add(new Metric(ROW_CACHE_ENTRIES_GLOBAL, COUNT, rowCacheEntries));
 
         return metrics;
     }
@@ -92,12 +95,12 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
         List<Metric> metrics = new ArrayList<>();
 
         BigDecimal load = jmxRunner.getAttribute(connection, "org.apache.cassandra.db", null, "StorageService", null, "Load");
-        metrics.add(new Metric(String.format(STORAGE_LOAD_INSTANCE, instance), "bytes", load));
-        metrics.add(new Metric(STORAGE_LOAD_GLOBAL, "bytes", load));
+        metrics.add(new Metric(String.format(STORAGE_LOAD_INSTANCE, instance), BYTES, load));
+        metrics.add(new Metric(STORAGE_LOAD_GLOBAL, BYTES, load));
 
         Long commitLogSize = jmxRunner.getAttribute(connection, "org.apache.cassandra.db", null, "Commitlog", null, "TotalCommitlogSize");
-        metrics.add(new Metric(String.format(COMMIT_LOG_INSTANCE, instance), "bytes", commitLogSize));
-        metrics.add(new Metric(COMMIT_LOG_GLOBAL, "bytes", commitLogSize));
+        metrics.add(new Metric(String.format(COMMIT_LOG_INSTANCE, instance), BYTES, commitLogSize));
+        metrics.add(new Metric(COMMIT_LOG_GLOBAL, BYTES, commitLogSize));
 
         return metrics;
     }
@@ -107,8 +110,8 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
 
         Integer compactionPendingTasks = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "PendingTasks", "Compaction", null, "Value");
         Long memtableFlushPendingTasks = jmxRunner.getAttribute(connection, "org.apache.cassandra.internal", null, "MemtablePostFlusher", null, "PendingTasks");
-        metrics.add(new Metric(String.format(COMPACTION_PENDING_TASKS, instance), "count", compactionPendingTasks));
-        metrics.add(new Metric(String.format(MEMTABLE_PENDING_TASKS, instance), "count", memtableFlushPendingTasks));
+        metrics.add(new Metric(String.format(COMPACTION_PENDING_TASKS, instance), COUNT, compactionPendingTasks));
+        metrics.add(new Metric(String.format(MEMTABLE_PENDING_TASKS, instance), COUNT, memtableFlushPendingTasks));
 
         return metrics;
     }
