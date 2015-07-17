@@ -14,7 +14,7 @@ public class Main {
 
         } catch (Exception e) {
             logger.error("ERROR: " + e.getMessage(), e);
-            System.exit(0);
+            System.exit(-1);
         }
     }
 }

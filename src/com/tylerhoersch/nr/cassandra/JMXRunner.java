@@ -16,15 +16,14 @@ import java.util.Set;
 public class JMXRunner {
     private final static Logger logger = Logger.getLogger(JMXRunner.class);
     private final static String JMX_URL_FORMAT = "service:jmx:rmi:///jndi/rmi://%s:%s/jmxrmi";
+    private final static String OBJECT_NAME_NAME = "name";
+    private final static String OBJECT_NAME_TYPE = "type";
+    private final static String OBJECT_NAME_SCOPE = "scope";
 
     private final String host;
     private final String port;
     private final String username;
     private final String password;
-
-    public JMXRunner(String host, String port) {
-        this(host, port, null, null);
-    }
 
     public JMXRunner(String host, String port, String username, String password) {
         this.host = host;
@@ -34,12 +33,11 @@ public class JMXRunner {
     }
 
     public <T> T run(JMXTemplate<T> template) throws Exception {
-        JMXServiceURL address;
         JMXConnector connector = null;
         T value = null;
 
         try {
-            address = new JMXServiceURL(String.format(JMX_URL_FORMAT, host, port));
+            JMXServiceURL address = new JMXServiceURL(String.format(JMX_URL_FORMAT, host, port));
             try {
                 Map<String, String[]> environment = getEnvironmentMap();
                 connector = environment == null
@@ -60,7 +58,25 @@ public class JMXRunner {
         return value;
     }
 
-    public Map<String, String[]> getEnvironmentMap() {
+    public <T> T getAttribute(MBeanServerConnection connection, String domain, String name, String type, String scope, String attribute) throws Exception {
+        return getAttribute(connection, createObjectName(domain, name, type, scope), attribute);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T getAttribute(MBeanServerConnection connection, ObjectName objectName, String attribute) throws Exception {
+        Set<ObjectInstance> instances = queryConnectionBy(connection, objectName);
+        if(instances == null || instances.size() == 0) {
+            return null;
+        }
+
+        return (T) connection.getAttribute(objectName, attribute);
+    }
+
+    private Set<ObjectInstance> queryConnectionBy(MBeanServerConnection connection, ObjectName objectName) throws Exception {
+        return connection.queryMBeans(objectName, null);
+    }
+
+    private Map<String, String[]> getEnvironmentMap() {
         if(username == null || password == null) {
             return null;
         }
@@ -71,38 +87,23 @@ public class JMXRunner {
         return environment;
     }
 
-    public <T> T getAttribute(MBeanServerConnection connection, String domain, String name, String type, String scope, String attribute) throws Exception {
-        return getAttribute(connection, createObjectName(domain, name, type, scope), attribute);
-    }
-
-    public <T> T getAttribute(MBeanServerConnection connection, ObjectName objectName, String attribute) throws Exception {
-        Set<ObjectInstance> instances = queryConnectionBy(connection, objectName);
-        if(instances == null || instances.size() == 0) {
-            return null;
+    private void close(JMXConnector connector) {
+        if (connector == null) {
+            return;
         }
 
-        return (T) connection.getAttribute(objectName, attribute);
-    }
-
-    public Set<ObjectInstance> queryConnectionBy(MBeanServerConnection connection, ObjectName objectName) throws Exception {
-        return connection.queryMBeans(objectName, null);
-    }
-
-    private void close(JMXConnector connector) {
-        if (connector != null) {
-            try {
-                connector.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        try {
+            connector.close();
+        } catch (IOException e) {
+            logger.error("Error closing JMX connection: ", e);
         }
     }
 
     private ObjectName createObjectName(String domain, String name, String type, String scope) throws Exception {
         Hashtable<String,String> table = new Hashtable<>();
-        if (name != null) table.put("name", name);
-        if (type != null) table.put("type", type);
-        if (scope != null) table.put("scope", scope);
+        if (name != null) table.put(OBJECT_NAME_NAME, name);
+        if (type != null) table.put(OBJECT_NAME_TYPE, type);
+        if (scope != null) table.put(OBJECT_NAME_SCOPE, scope);
         return ObjectName.getInstance(domain, table);
     }
 

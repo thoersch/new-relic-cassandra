@@ -11,11 +11,14 @@ public class CassandraAgentFactory extends AgentFactory {
     public Agent createConfiguredAgent(Map<String, Object> map) throws ConfigurationException {
         String name = (String) map.get("name");
         String host = (String) map.get("host");
+        String port = (String) map.get("port");
+        String username = map.get("username") == null ? null : (String)map.get("username");
+        String password = map.get("password") == null ? null : (String)map.get("password");
 
         if (name == null || host == null) {
             throw new ConfigurationException("'name' and 'host' cannot be null.");
         }
 
-        return new CassandraAgent(name, host);
+        return new CassandraAgent(name, host, port, username, password);
     }
 }
