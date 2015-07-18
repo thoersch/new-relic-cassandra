@@ -25,6 +25,6 @@ public class CassandraAgentFactory extends AgentFactory {
             throw new ConfigurationException(String.format("'%s', '%s' and '%s' cannot be null.", USERNAME, PASSWORD, PORT));
         }
 
-        return new CassandraAgent(name, host, port, username, password);
+        return new CassandraAgent(name, new JMXRunner(host, port, username, password));
     }
 }

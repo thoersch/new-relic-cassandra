@@ -15,11 +15,11 @@ public class CassandraAgent extends Agent {
     private final String name;
     private final JMXRunner jmxRunner;
 
-    public CassandraAgent(String name, String host, String port, String username, String password) {
+    public CassandraAgent(String name, JMXRunner jmxRunner) {
         super(GUID, VERSION);
 
         this.name = name;
-        jmxRunner = new JMXRunner(host, port, username, password);
+        this.jmxRunner = jmxRunner;
     }
 
     @Override
@@ -33,7 +33,7 @@ public class CassandraAgent extends Agent {
         try {
             List<String> cassandraInstances = getCassandraInstances();
             for(String instance : cassandraInstances) {
-                metrics = getCassandraMetrics(instance);
+                metrics.addAll(getCassandraMetrics(instance));
             }
 
         } catch (Exception e) {
