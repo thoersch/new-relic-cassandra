@@ -64,6 +64,10 @@
 
     <target name="dist" depends="jar" description="create a downloadable file">
         <mkdir dir="${build.tar.src.dir}" />
+        <copy file="${conf.dir}/plugin.template.json" todir="${build.tar.src.dir}/config" />
+        <copy file="${conf.dir}/newrelic.template.json" todir="${build.tar.src.dir}/config" />
+        <copy file="LICENSE" todir="${build.tar.src.dir}" />
+        <copy file="README.md" todir="${build.tar.src.dir}" />
         <copy todir="${build.tar.src.dir}/config">
             <fileset dir="${conf.dir}" />
         </copy>

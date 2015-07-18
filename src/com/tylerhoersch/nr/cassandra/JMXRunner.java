@@ -46,8 +46,8 @@ public class JMXRunner {
             } catch (IOException ex) {
                 throw new Exception(host, ex);
             }
-            MBeanServerConnection mbs = connector.getMBeanServerConnection();
-            value = template.execute(mbs, this);
+            MBeanServerConnection connection = connector.getMBeanServerConnection();
+            value = template.execute(connection, this);
         } catch (Exception e) {
             logger.error(e);
             throw e;
