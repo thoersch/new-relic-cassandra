@@ -1,9 +1,9 @@
 package com.tylerhoersch.nr.cassandra;
 
 public class Metric {
-    public final String name;
-    public final String valueType;
-    public final Number value;
+    private final String name;
+    private final String valueType;
+    private final Number value;
 
     public Metric(String name, String valueType, Number value) {
         this.name = name;
@@ -11,4 +11,15 @@ public class Metric {
         this.value = value;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public String getValueType() {
+        return valueType;
+    }
+
+    public Number getValue() {
+        return value;
+    }
 }
