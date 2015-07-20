@@ -161,6 +161,11 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
     }
 
     private Double toMillis(Double sourceValue, TimeUnit sourceUnit) {
+
+        if(sourceUnit == null || sourceValue == null){
+            return null;
+        }
+
         switch (sourceUnit) {
             case DAYS:
                 return sourceValue * 86400000;
