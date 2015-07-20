@@ -5,6 +5,7 @@ import com.newrelic.metrics.publish.AgentFactory;
 import com.newrelic.metrics.publish.configuration.ConfigurationException;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class CassandraAgentFactory extends AgentFactory {
     private static final String NAME = "name";
@@ -28,7 +29,7 @@ public class CassandraAgentFactory extends AgentFactory {
         return new CassandraAgent(name, new JMXRunner(host, port, username, password));
     }
 
-    private boolean isNullOrEmpty(String value) {
-        return value == null || value == "";
+    private boolean isNullOrEmpty(Object value) {
+        return value == null || value.toString() == "";
     }
 }
