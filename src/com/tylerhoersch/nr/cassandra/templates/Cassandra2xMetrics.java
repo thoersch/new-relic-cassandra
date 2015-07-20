@@ -66,7 +66,7 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
     private List<Metric> getCacheMetrics(MBeanServerConnection connection, JMXRunner jmxRunner) throws Exception {
         List<Metric> metrics = new ArrayList<>();
 
-        BigDecimal keyCacheHitRate = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "HitRate", "Cache", "KeyCache", "Value");
+        BigDecimal keyCacheHitRate = BigDecimal.valueOf(jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "HitRate", "Cache", "KeyCache", "Value"));
         metrics.add(new Metric(String.format(KEY_CACHE_HIT_RATE_INSTANCE, instance), RATE, keyCacheHitRate));
         metrics.add(new Metric(KEY_CACHE_HIT_RATE_GLOBAL, RATE, keyCacheHitRate));
 
@@ -78,7 +78,7 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
         metrics.add(new Metric(String.format(KEY_CACHE_ENTRIES_INSTANCE, instance), COUNT, keyCacheEntries));
         metrics.add(new Metric(KEY_CACHE_ENTRIES_GLOBAL, COUNT, keyCacheEntries));
 
-        BigDecimal rowCacheHitRate = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "HitRate", "Cache", "RowCache", "Value");
+        BigDecimal rowCacheHitRate = BigDecimal.valueOf(jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "HitRate", "Cache", "RowCache", "Value"));
         metrics.add(new Metric(String.format(ROW_CACHE_HIT_RATE_INSTANCE, instance), RATE, rowCacheHitRate));
         metrics.add(new Metric(ROW_CACHE_HIT_RATE_GLOBAL, RATE, rowCacheHitRate));
 
@@ -96,7 +96,7 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
     private List<Metric> getStorageMetrics(MBeanServerConnection connection, JMXRunner jmxRunner) throws Exception {
         List<Metric> metrics = new ArrayList<>();
 
-        BigDecimal load = jmxRunner.getAttribute(connection, "org.apache.cassandra.db", null, "StorageService", null, "Load");
+        BigDecimal load = BigDecimal.valueOf(jmxRunner.getAttribute(connection, "org.apache.cassandra.db", null, "StorageService", null, "Load"));
         metrics.add(new Metric(String.format(STORAGE_LOAD_INSTANCE, instance), BYTES, load));
         metrics.add(new Metric(STORAGE_LOAD_GLOBAL, BYTES, load));
 
@@ -121,12 +121,12 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
     private List<Metric> getLatencyMetrics(MBeanServerConnection connection, JMXRunner jmxRunner) throws Exception {
         List<Metric> metrics = new ArrayList<>();
 
-        BigDecimal readMean = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Latency", "ClientRequest", "Read", "Mean");
+        BigDecimal readMean = BigDecimal.valueOf(jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Latency", "ClientRequest", "Read", "Mean"));
         TimeUnit readMeanUnits = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Latency", "ClientRequest", "Read", "LatencyUnit");
         metrics.add(new Metric(String.format(READ_LATENCY_INSTANCE, instance), MILLIS, toMillis(readMean, readMeanUnits)));
         metrics.add(new Metric(READ_LATENCY_GLOBAL, MILLIS, toMillis(readMean, readMeanUnits)));
 
-        BigDecimal writeMean = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Latency", "ClientRequest", "Write", "Mean");
+        BigDecimal writeMean = BigDecimal.valueOf(jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Latency", "ClientRequest", "Write", "Mean"));
         TimeUnit writeMeanUnits = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Latency", "ClientRequest", "Write", "LatencyUnit");
         metrics.add(new Metric(String.format(WRITE_LATENCY_INSTANCE, instance), MILLIS, toMillis(writeMean, writeMeanUnits)));
         metrics.add(new Metric(WRITE_LATENCY_GLOBAL, MILLIS, toMillis(writeMean, writeMeanUnits)));
