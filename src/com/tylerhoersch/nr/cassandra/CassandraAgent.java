@@ -35,12 +35,12 @@ public class CassandraAgent extends Agent {
             for(String instance : cassandraInstances) {
                 metrics.addAll(getCassandraMetrics(instance));
             }
+
+            metrics.stream()
+                    .filter(m -> m.getValue() != null && !m.getValue().toString().equals("NaN"))
+                    .forEach(m -> reportMetric(m.getName(), m.getValueType(), m.getValue()));
         } catch (Exception e) {
             logger.error("Error Polling Cassandra: ", e);
-        } finally {
-            metrics.stream()
-                   .filter(m -> m.getValue() != null && !m.getValue().toString().equals("NaN"))
-                   .forEach(m -> reportMetric(m.getName(), m.getValueType(), m.getValue()));
         }
     }
 
