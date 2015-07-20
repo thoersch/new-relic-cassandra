@@ -18,13 +18,17 @@ public class CassandraAgentFactory extends AgentFactory {
         String name = (String) map.get(NAME);
         String host = (String) map.get(HOST);
         String port = (String) map.get(PORT);
-        String username = map.get(USERNAME) == null ? null : (String)map.get(USERNAME);
-        String password = map.get(PASSWORD) == null ? null : (String)map.get(PASSWORD);
+        String username = isNullOrEmpty(map.get(USERNAME)) ? null : (String)map.get(USERNAME);
+        String password = isNullOrEmpty(map.get(PASSWORD)) ? null : (String)map.get(PASSWORD);
 
         if (name == null || host == null || port == null) {
             throw new ConfigurationException(String.format("'%s', '%s' and '%s' cannot be null.", USERNAME, PASSWORD, PORT));
         }
 
         return new CassandraAgent(name, new JMXRunner(host, port, username, password));
+    }
+
+    private boolean isNullOrEmpty(String value) {
+        return value == null || value == "";
     }
 }

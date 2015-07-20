@@ -32,6 +32,7 @@ public class CassandraAgent extends Agent {
         List<Metric> metrics = new ArrayList<>();
         try {
             List<String> cassandraInstances = getCassandraInstances();
+
             for(String instance : cassandraInstances) {
                 metrics.addAll(getCassandraMetrics(instance));
             }
