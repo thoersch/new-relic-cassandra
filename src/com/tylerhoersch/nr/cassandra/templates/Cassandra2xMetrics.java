@@ -6,6 +6,7 @@ import com.tylerhoersch.nr.cassandra.JMXTemplate;
 import com.tylerhoersch.nr.cassandra.Metric;
 
 import javax.management.MBeanServerConnection;
+import java.lang.Long;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +71,7 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
         List<Metric> metrics = new ArrayList<>();
 
         try {
-            BigDecimal keyCacheHitRate = BigDecimal.valueOf(jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "HitRate", "Cache", "KeyCache", "Value"));
+            Double keyCacheHitRate = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "HitRate", "Cache", "KeyCache", "Value");
             metrics.add(new Metric(String.format(KEY_CACHE_HIT_RATE_INSTANCE, instance), RATE, keyCacheHitRate));
             metrics.add(new Metric(KEY_CACHE_HIT_RATE_GLOBAL, RATE, keyCacheHitRate));
 
@@ -82,7 +83,7 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
             metrics.add(new Metric(String.format(KEY_CACHE_ENTRIES_INSTANCE, instance), COUNT, keyCacheEntries));
             metrics.add(new Metric(KEY_CACHE_ENTRIES_GLOBAL, COUNT, keyCacheEntries));
 
-            BigDecimal rowCacheHitRate = BigDecimal.valueOf(jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "HitRate", "Cache", "RowCache", "Value"));
+            Double rowCacheHitRate = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "HitRate", "Cache", "RowCache", "Value");
             metrics.add(new Metric(String.format(ROW_CACHE_HIT_RATE_INSTANCE, instance), RATE, rowCacheHitRate));
             metrics.add(new Metric(ROW_CACHE_HIT_RATE_GLOBAL, RATE, rowCacheHitRate));
 
@@ -104,7 +105,7 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
         List<Metric> metrics = new ArrayList<>();
 
         try {
-            BigDecimal load = BigDecimal.valueOf(jmxRunner.getAttribute(connection, "org.apache.cassandra.db", null, "StorageService", null, "Load"));
+            Double load = jmxRunner.getAttribute(connection, "org.apache.cassandra.db", null, "StorageService", null, "Load");
             metrics.add(new Metric(String.format(STORAGE_LOAD_INSTANCE, instance), BYTES, load));
             metrics.add(new Metric(STORAGE_LOAD_GLOBAL, BYTES, load));
 
@@ -137,12 +138,12 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
         List<Metric> metrics = new ArrayList<>();
 
         try {
-            BigDecimal readMean = BigDecimal.valueOf(jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Latency", "ClientRequest", "Read", "Mean"));
+            Double readMean = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Latency", "ClientRequest", "Read", "Mean");
             TimeUnit readMeanUnits = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Latency", "ClientRequest", "Read", "LatencyUnit");
             metrics.add(new Metric(String.format(READ_LATENCY_INSTANCE, instance), MILLIS, toMillis(readMean, readMeanUnits)));
             metrics.add(new Metric(READ_LATENCY_GLOBAL, MILLIS, toMillis(readMean, readMeanUnits)));
 
-            BigDecimal writeMean = BigDecimal.valueOf(jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Latency", "ClientRequest", "Write", "Mean"));
+            Double writeMean = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Latency", "ClientRequest", "Write", "Mean");
             TimeUnit writeMeanUnits = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Latency", "ClientRequest", "Write", "LatencyUnit");
             metrics.add(new Metric(String.format(WRITE_LATENCY_INSTANCE, instance), MILLIS, toMillis(writeMean, writeMeanUnits)));
             metrics.add(new Metric(WRITE_LATENCY_GLOBAL, MILLIS, toMillis(writeMean, writeMeanUnits)));
@@ -159,22 +160,22 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
         return metrics;
     }
 
-    private BigDecimal toMillis(BigDecimal sourceValue, TimeUnit sourceUnit) {
+    private Double toMillis(Double sourceValue, TimeUnit sourceUnit) {
         switch (sourceUnit) {
             case DAYS:
-                return sourceValue.multiply(new BigDecimal(86400000));
+                return sourceValue * 86400000;
             case MICROSECONDS:
-                return sourceValue.multiply(new BigDecimal(0.001));
+                return sourceValue * 0.001;
             case HOURS:
-                return sourceValue.multiply(new BigDecimal(3600000));
+                return sourceValue * 3600000;
             case MILLISECONDS:
                 return sourceValue;
             case MINUTES:
-                return sourceValue.multiply(new BigDecimal(60000));
+                return sourceValue * 60000;
             case NANOSECONDS:
-                return sourceValue.multiply(new BigDecimal(1.0e-6));
+                return sourceValue * 1.0e-6;
             case SECONDS:
-                return sourceValue.multiply(new BigDecimal(1000));
+                return sourceValue * 1000;
             default:
                 return sourceValue;
         }
