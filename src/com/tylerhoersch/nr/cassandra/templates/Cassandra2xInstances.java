@@ -21,7 +21,7 @@ public class Cassandra2xInstances implements JMXTemplate<List<String>> {
             return instances;
         }
 
-        instances = (List<String>) scores.keySet().stream().map(s -> s.toString().substring(s.toString().indexOf("/")+1, s.toString().indexOf("="))).collect(Collectors.toList());
+        instances = (List<String>) scores.keySet().stream().map(s -> s.toString().substring(s.toString().indexOf("/")+1, s.toString().length())).collect(Collectors.toList());
 
         return instances;
     }
