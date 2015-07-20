@@ -26,9 +26,9 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
     private static final String COMPACTION_PENDING_TASKS = "Cassandra/hosts/%s/Compaction/PendingTasks";
     private static final String MEMTABLE_PENDING_TASKS = "Cassandra/hosts/%s/MemtableFlush/PendingTasks";
 
-    private static final String STORAGE_LOAD_INSTANCE = "Cassandra/host/%s/Storage/Data";
+    private static final String STORAGE_LOAD_INSTANCE = "Cassandra/hosts/%s/Storage/Data";
     private static final String STORAGE_LOAD_GLOBAL = "Cassandra/global/Storage/Data";
-    private static final String COMMIT_LOG_INSTANCE = "Cassandra/host/%s/Storage/CommitLog";
+    private static final String COMMIT_LOG_INSTANCE = "Cassandra/hosts/%s/Storage/CommitLog";
     private static final String COMMIT_LOG_GLOBAL = "Cassandra/global/Storage/CommitLog";
 
     private static final String KEY_CACHE_HIT_RATE_INSTANCE = "Cassandra/hosts/%s/Cache/KeyCache/HitRate";

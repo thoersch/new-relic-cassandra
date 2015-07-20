@@ -5,7 +5,6 @@ import com.newrelic.metrics.publish.AgentFactory;
 import com.newrelic.metrics.publish.configuration.ConfigurationException;
 
 import java.util.Map;
-import java.util.Objects;
 
 public class CassandraAgentFactory extends AgentFactory {
     private static final String NAME = "name";
