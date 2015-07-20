@@ -16,6 +16,8 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
     private static final String WRITE_LATENCY_INSTANCE = "Cassandra/hosts/%s/Latency/Writes";
     private static final String READ_LATENCY_GLOBAL = "Cassandra/global/Latency/Reads";
     private static final String WRITE_LATENCY_GLOBAL = "Cassandra/global/Latency/Writes";
+    private static final String READ_TIMEOUTS = "Cassandra/hosts/%s/Timeouts/Reads";
+    private static final String WRITE_TIMEOUTS = "Cassandra/hosts/%s/Timeouts/Writes";
 
     private static final String COMPACTION_PENDING_TASKS = "Cassandra/hosts/%s/Compaction/PendingTasks";
     private static final String MEMTABLE_PENDING_TASKS = "Cassandra/hosts/%s/MemtableFlush/PendingTasks";
@@ -128,6 +130,12 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
         TimeUnit writeMeanUnits = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Latency", "ClientRequest", "Write", "LatencyUnit");
         metrics.add(new Metric(String.format(WRITE_LATENCY_INSTANCE, instance), MILLIS, toMillis(writeMean, writeMeanUnits)));
         metrics.add(new Metric(WRITE_LATENCY_GLOBAL, MILLIS, toMillis(writeMean, writeMeanUnits)));
+
+        Long readTimeouts = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Timeouts", "ClientRequest", "Read", "Count");
+        metrics.add(new Metric(String.format(READ_TIMEOUTS, instance), COUNT, readTimeouts));
+
+        Long writeTimeouts = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Timeouts", "ClientRequest", "Write", "Count");
+        metrics.add(new Metric(String.format(WRITE_TIMEOUTS, instance), COUNT, writeTimeouts));
 
         return metrics;
     }
