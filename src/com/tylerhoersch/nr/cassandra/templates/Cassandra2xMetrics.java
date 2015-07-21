@@ -59,10 +59,14 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
     public List<Metric> execute(MBeanServerConnection connection, JMXRunner jmxRunner) throws Exception {
         List<Metric> metrics = new ArrayList<>();
 
-        metrics.addAll(getLatencyMetrics(connection, jmxRunner));
-        metrics.addAll(getSystemMetrics(connection, jmxRunner));
-        metrics.addAll(getStorageMetrics(connection, jmxRunner));
-        metrics.addAll(getCacheMetrics(connection, jmxRunner));
+        try {
+            metrics.addAll(getLatencyMetrics(connection, jmxRunner));
+            metrics.addAll(getSystemMetrics(connection, jmxRunner));
+            metrics.addAll(getStorageMetrics(connection, jmxRunner));
+            metrics.addAll(getCacheMetrics(connection, jmxRunner));
+        } catch (Exception e) {
+            logger.error("Error polling for metrics:", e);
+        }
 
         return metrics;
     }
@@ -70,33 +74,29 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
     private List<Metric> getCacheMetrics(MBeanServerConnection connection, JMXRunner jmxRunner) throws Exception {
         List<Metric> metrics = new ArrayList<>();
 
-        try {
-            Double keyCacheHitRate = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "HitRate", "Cache", "KeyCache", "Value");
-            metrics.add(new Metric(String.format(KEY_CACHE_HIT_RATE_INSTANCE, instance), RATE, keyCacheHitRate));
-            metrics.add(new Metric(KEY_CACHE_HIT_RATE_GLOBAL, RATE, keyCacheHitRate));
+        Double keyCacheHitRate = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "HitRate", "Cache", "KeyCache", "Value");
+        metrics.add(new Metric(String.format(KEY_CACHE_HIT_RATE_INSTANCE, instance), RATE, keyCacheHitRate));
+        metrics.add(new Metric(KEY_CACHE_HIT_RATE_GLOBAL, RATE, keyCacheHitRate));
 
-            Long keyCacheSize = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Size", "Cache", "KeyCache", "Value");
-            metrics.add(new Metric(String.format(KEY_CACHE_SIZE_INSTANCE, instance), BYTES, keyCacheSize));
-            metrics.add(new Metric(KEY_CACHE_SIZE_GLOBAL, BYTES, keyCacheSize));
+        Long keyCacheSize = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Size", "Cache", "KeyCache", "Value");
+        metrics.add(new Metric(String.format(KEY_CACHE_SIZE_INSTANCE, instance), BYTES, keyCacheSize));
+        metrics.add(new Metric(KEY_CACHE_SIZE_GLOBAL, BYTES, keyCacheSize));
 
-            Integer keyCacheEntries = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Entries", "Cache", "KeyCache", "Value");
-            metrics.add(new Metric(String.format(KEY_CACHE_ENTRIES_INSTANCE, instance), COUNT, keyCacheEntries));
-            metrics.add(new Metric(KEY_CACHE_ENTRIES_GLOBAL, COUNT, keyCacheEntries));
+        Integer keyCacheEntries = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Entries", "Cache", "KeyCache", "Value");
+        metrics.add(new Metric(String.format(KEY_CACHE_ENTRIES_INSTANCE, instance), COUNT, keyCacheEntries));
+        metrics.add(new Metric(KEY_CACHE_ENTRIES_GLOBAL, COUNT, keyCacheEntries));
 
-            Double rowCacheHitRate = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "HitRate", "Cache", "RowCache", "Value");
-            metrics.add(new Metric(String.format(ROW_CACHE_HIT_RATE_INSTANCE, instance), RATE, rowCacheHitRate));
-            metrics.add(new Metric(ROW_CACHE_HIT_RATE_GLOBAL, RATE, rowCacheHitRate));
+        Double rowCacheHitRate = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "HitRate", "Cache", "RowCache", "Value");
+        metrics.add(new Metric(String.format(ROW_CACHE_HIT_RATE_INSTANCE, instance), RATE, rowCacheHitRate));
+        metrics.add(new Metric(ROW_CACHE_HIT_RATE_GLOBAL, RATE, rowCacheHitRate));
 
-            Long rowCacheSize = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Size", "Cache", "RowCache", "Value");
-            metrics.add(new Metric(String.format(ROW_CACHE_SIZE_INSTANCE, instance), BYTES, rowCacheSize));
-            metrics.add(new Metric(ROW_CACHE_SIZE_GLOBAL, BYTES, rowCacheSize));
+        Long rowCacheSize = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Size", "Cache", "RowCache", "Value");
+        metrics.add(new Metric(String.format(ROW_CACHE_SIZE_INSTANCE, instance), BYTES, rowCacheSize));
+        metrics.add(new Metric(ROW_CACHE_SIZE_GLOBAL, BYTES, rowCacheSize));
 
-            Integer rowCacheEntries = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Entries", "Cache", "RowCache", "Value");
-            metrics.add(new Metric(String.format(ROW_CACHE_ENTRIES_INSTANCE, instance), COUNT, rowCacheEntries));
-            metrics.add(new Metric(ROW_CACHE_ENTRIES_GLOBAL, COUNT, rowCacheEntries));
-        } catch(Exception e) {
-            logger.error(e);
-        }
+        Integer rowCacheEntries = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Entries", "Cache", "RowCache", "Value");
+        metrics.add(new Metric(String.format(ROW_CACHE_ENTRIES_INSTANCE, instance), COUNT, rowCacheEntries));
+        metrics.add(new Metric(ROW_CACHE_ENTRIES_GLOBAL, COUNT, rowCacheEntries));
 
         return metrics;
     }
@@ -104,17 +104,13 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
     private List<Metric> getStorageMetrics(MBeanServerConnection connection, JMXRunner jmxRunner) throws Exception {
         List<Metric> metrics = new ArrayList<>();
 
-        try {
-            Double load = jmxRunner.getAttribute(connection, "org.apache.cassandra.db", null, "StorageService", null, "Load");
-            metrics.add(new Metric(String.format(STORAGE_LOAD_INSTANCE, instance), BYTES, load));
-            metrics.add(new Metric(STORAGE_LOAD_GLOBAL, BYTES, load));
+        Double load = jmxRunner.getAttribute(connection, "org.apache.cassandra.db", null, "StorageService", null, "Load");
+        metrics.add(new Metric(String.format(STORAGE_LOAD_INSTANCE, instance), BYTES, load));
+        metrics.add(new Metric(STORAGE_LOAD_GLOBAL, BYTES, load));
 
-            Long commitLogSize = jmxRunner.getAttribute(connection, "org.apache.cassandra.db", null, "Commitlog", null, "TotalCommitlogSize");
-            metrics.add(new Metric(String.format(COMMIT_LOG_INSTANCE, instance), BYTES, commitLogSize));
-            metrics.add(new Metric(COMMIT_LOG_GLOBAL, BYTES, commitLogSize));
-        } catch (Exception e) {
-            logger.error(e);
-        }
+        Long commitLogSize = jmxRunner.getAttribute(connection, "org.apache.cassandra.db", null, "Commitlog", null, "TotalCommitlogSize");
+        metrics.add(new Metric(String.format(COMMIT_LOG_INSTANCE, instance), BYTES, commitLogSize));
+        metrics.add(new Metric(COMMIT_LOG_GLOBAL, BYTES, commitLogSize));
 
         return metrics;
     }
@@ -122,14 +118,10 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
     private List<Metric> getSystemMetrics(MBeanServerConnection connection, JMXRunner jmxRunner) throws Exception {
         List<Metric> metrics = new ArrayList<>();
 
-        try {
-            Integer compactionPendingTasks = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "PendingTasks", "Compaction", null, "Value");
-            Long memtableFlushPendingTasks = jmxRunner.getAttribute(connection, "org.apache.cassandra.internal", null, "MemtablePostFlusher", null, "PendingTasks");
-            metrics.add(new Metric(String.format(COMPACTION_PENDING_TASKS, instance), COUNT, compactionPendingTasks));
-            metrics.add(new Metric(String.format(MEMTABLE_PENDING_TASKS, instance), COUNT, memtableFlushPendingTasks));
-        } catch (Exception e) {
-            logger.error(e);
-        }
+        Integer compactionPendingTasks = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "PendingTasks", "Compaction", null, "Value");
+        Long memtableFlushPendingTasks = jmxRunner.getAttribute(connection, "org.apache.cassandra.internal", null, "MemtablePostFlusher", null, "PendingTasks");
+        metrics.add(new Metric(String.format(COMPACTION_PENDING_TASKS, instance), COUNT, compactionPendingTasks));
+        metrics.add(new Metric(String.format(MEMTABLE_PENDING_TASKS, instance), COUNT, memtableFlushPendingTasks));
 
         return metrics;
     }
@@ -137,25 +129,21 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
     private List<Metric> getLatencyMetrics(MBeanServerConnection connection, JMXRunner jmxRunner) throws Exception {
         List<Metric> metrics = new ArrayList<>();
 
-        try {
-            Double readMean = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Latency", "ClientRequest", "Read", "Mean");
-            TimeUnit readMeanUnits = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Latency", "ClientRequest", "Read", "LatencyUnit");
-            metrics.add(new Metric(String.format(READ_LATENCY_INSTANCE, instance), MILLIS, toMillis(readMean, readMeanUnits)));
-            metrics.add(new Metric(READ_LATENCY_GLOBAL, MILLIS, toMillis(readMean, readMeanUnits)));
+        Double readMean = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Latency", "ClientRequest", "Read", "Mean");
+        TimeUnit readMeanUnits = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Latency", "ClientRequest", "Read", "LatencyUnit");
+        metrics.add(new Metric(String.format(READ_LATENCY_INSTANCE, instance), MILLIS, toMillis(readMean, readMeanUnits)));
+        metrics.add(new Metric(READ_LATENCY_GLOBAL, MILLIS, toMillis(readMean, readMeanUnits)));
 
-            Double writeMean = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Latency", "ClientRequest", "Write", "Mean");
-            TimeUnit writeMeanUnits = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Latency", "ClientRequest", "Write", "LatencyUnit");
-            metrics.add(new Metric(String.format(WRITE_LATENCY_INSTANCE, instance), MILLIS, toMillis(writeMean, writeMeanUnits)));
-            metrics.add(new Metric(WRITE_LATENCY_GLOBAL, MILLIS, toMillis(writeMean, writeMeanUnits)));
+        Double writeMean = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Latency", "ClientRequest", "Write", "Mean");
+        TimeUnit writeMeanUnits = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Latency", "ClientRequest", "Write", "LatencyUnit");
+        metrics.add(new Metric(String.format(WRITE_LATENCY_INSTANCE, instance), MILLIS, toMillis(writeMean, writeMeanUnits)));
+        metrics.add(new Metric(WRITE_LATENCY_GLOBAL, MILLIS, toMillis(writeMean, writeMeanUnits)));
 
-            Long readTimeouts = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Timeouts", "ClientRequest", "Read", "Count");
-            metrics.add(new Metric(String.format(READ_TIMEOUTS, instance), COUNT, readTimeouts));
+        Long readTimeouts = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Timeouts", "ClientRequest", "Read", "Count");
+        metrics.add(new Metric(String.format(READ_TIMEOUTS, instance), COUNT, readTimeouts));
 
-            Long writeTimeouts = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Timeouts", "ClientRequest", "Write", "Count");
-            metrics.add(new Metric(String.format(WRITE_TIMEOUTS, instance), COUNT, writeTimeouts));
-        } catch(Exception e) {
-            logger.error(e);
-        }
+        Long writeTimeouts = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Timeouts", "ClientRequest", "Write", "Count");
+        metrics.add(new Metric(String.format(WRITE_TIMEOUTS, instance), COUNT, writeTimeouts));
 
         return metrics;
     }
