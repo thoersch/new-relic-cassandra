@@ -1,6 +1,8 @@
 # New Relic Cassandra Plugin - Java
 
-Plugin is currently in progress, with the focus of supporting Cassandra 2.x and JMX Authentication.
+Plugin is currently work in progress, with the focus of supporting Cassandra 2.x and JMX Authentication.
+
+More metrics coming!
 
 ----
 
@@ -14,8 +16,6 @@ Plugin is currently in progress, with the focus of supporting Cassandra 2.x and 
 ----
 
 ## Installation
-
-*Warning this plugin is currently work in progress*
 
 You can either clone and build locally from source or,
 download the [tar file](https://github.com/thoersch/new-relic-cassandra/tree/master/dist)
