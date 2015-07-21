@@ -46,7 +46,7 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
     private static final String ROW_CACHE_ENTRIES_GLOBAL = "Cassandra/global/Cache/RowCache/Entries";
 
     private static final String DOWNTIME_INSTANCE = "Cassandra/hosts/%s/Downtime";
-    public static final String DOWNTIME_GLOBAL = "Cassandra/global/Downtime";
+    private static final String DOWNTIME_GLOBAL = "Cassandra/global/Downtime";
 
     private static final String MILLIS = "millis";
     private static final String RATE = "rate";
