@@ -6,9 +6,7 @@ import com.tylerhoersch.nr.cassandra.JMXTemplate;
 import com.tylerhoersch.nr.cassandra.Metric;
 
 import javax.management.MBeanServerConnection;
-import java.io.IOException;
 import java.lang.Long;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -45,14 +43,10 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
     private static final String ROW_CACHE_ENTRIES_INSTANCE = "Cassandra/hosts/%s/Cache/RowCache/Entries";
     private static final String ROW_CACHE_ENTRIES_GLOBAL = "Cassandra/global/Cache/RowCache/Entries";
 
-    private static final String DOWNTIME_INSTANCE = "Cassandra/hosts/%s/Downtime";
-    private static final String DOWNTIME_GLOBAL = "Cassandra/global/Downtime";
-
     private static final String MILLIS = "millis";
     private static final String RATE = "rate";
     private static final String BYTES = "bytes";
     private static final String COUNT = "count";
-    private static final String VALUE = "value";
 
     private final String instance;
 
@@ -69,9 +63,6 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
             metrics.addAll(getSystemMetrics(connection, jmxRunner));
             metrics.addAll(getStorageMetrics(connection, jmxRunner));
             metrics.addAll(getCacheMetrics(connection, jmxRunner));
-        } catch (IOException ioe) {
-            metrics.add(new Metric(String.format(DOWNTIME_INSTANCE, instance), VALUE, 1));
-            throw ioe;
         } catch (Exception e) {
             logger.error("Error polling for metrics:", e);
         }
@@ -180,9 +171,5 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
             default:
                 return sourceValue;
         }
-    }
-
-    public static Metric CreateDownHostsMetric(int failedHostCount) {
-        return new Metric(DOWNTIME_GLOBAL, COUNT, failedHostCount);
     }
 }

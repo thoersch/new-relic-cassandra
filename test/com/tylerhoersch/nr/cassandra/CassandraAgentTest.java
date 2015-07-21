@@ -1,5 +1,6 @@
 package com.tylerhoersch.nr.cassandra;
 
+import com.tylerhoersch.nr.cassandra.templates.Cassandra2xFailures;
 import com.tylerhoersch.nr.cassandra.templates.Cassandra2xInstances;
 import com.tylerhoersch.nr.cassandra.templates.Cassandra2xMetrics;
 import org.junit.Test;
@@ -18,7 +19,8 @@ public class CassandraAgentTest {
 
     @Test
     public void verifyMetricReportingForAllHosts() throws Exception {
-        final int downHostsMetrics = 1;
+        List<Metric> failures = new ArrayList<>();
+        failures.add(new Metric("f1", "v1", 0));
         List<String> instances = new ArrayList<>();
         instances.add("1.2.3.4");
         instances.add("2.2.3.2");
@@ -31,13 +33,18 @@ public class CassandraAgentTest {
         when(jmxRunner.run(any(JMXTemplate.class))).thenAnswer((mock) -> {
             // required since mockito was not giving unique results for
             // any(Cassandr2xIntances.class) vs. any(Cassandra2xMetrics.class)
-            if(mock.getArguments()[0] instanceof Cassandra2xInstances) {
+            Object template = mock.getArguments()[0];
+            if(template instanceof Cassandra2xInstances) {
                 return instances;
-            } else {
+            } else if (template instanceof Cassandra2xMetrics) {
                 return metrics;
+            } else if (template instanceof Cassandra2xFailures) {
+                return failures;
+            } else {
+                throw new Exception("Unsupported template type");
             }
         });
         cassandraAgent.pollCycle();
-        verify(cassandraAgent, times(instances.size() * metrics.size() + downHostsMetrics)).reportMetric(any(String.class), any(String.class), any(Number.class));
+        verify(cassandraAgent, times(instances.size() * metrics.size() + failures.size())).reportMetric(any(String.class), any(String.class), any(Number.class));
     }
 }
