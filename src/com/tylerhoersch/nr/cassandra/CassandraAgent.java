@@ -5,6 +5,7 @@ import com.newrelic.metrics.publish.util.Logger;
 import com.tylerhoersch.nr.cassandra.templates.Cassandra2xInstances;
 import com.tylerhoersch.nr.cassandra.templates.Cassandra2xMetrics;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,9 +34,16 @@ public class CassandraAgent extends Agent {
         try {
             List<String> cassandraInstances = getCassandraInstances();
 
+            int failedHostCount = 0;
             for(String instance : cassandraInstances) {
-                metrics.addAll(getCassandraMetrics(instance));
+                try {
+                    metrics.addAll(getCassandraMetrics(instance));
+                } catch (IOException e) {
+                    failedHostCount++;
+                }
             }
+
+            metrics.add(Cassandra2xMetrics.CreateDownHostsMetric(failedHostCount));
 
             metrics.stream()
                     .filter(m -> m.getValue() != null && !m.getValue().toString().equals("NaN"))

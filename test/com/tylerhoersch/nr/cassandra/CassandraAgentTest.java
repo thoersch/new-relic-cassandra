@@ -18,6 +18,7 @@ public class CassandraAgentTest {
 
     @Test
     public void verifyMetricReportingForAllHosts() throws Exception {
+        final int downHostsMetrics = 1;
         List<String> instances = new ArrayList<>();
         instances.add("1.2.3.4");
         instances.add("2.2.3.2");
@@ -37,6 +38,6 @@ public class CassandraAgentTest {
             }
         });
         cassandraAgent.pollCycle();
-        verify(cassandraAgent, times(instances.size() * metrics.size())).reportMetric(any(String.class), any(String.class), any(Number.class));
+        verify(cassandraAgent, times(instances.size() * metrics.size() + downHostsMetrics)).reportMetric(any(String.class), any(String.class), any(Number.class));
     }
 }
