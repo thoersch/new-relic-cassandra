@@ -1,4 +1,5 @@
 # New Relic Cassandra Plugin - Java
+[![Build Status](https://travis-ci.org/thoersch/new-relic-cassandra.svg?branch=master)](https://travis-ci.org/thoersch/new-relic-cassandra)
 
 Plugin is currently work in progress, with the focus of supporting Cassandra 2.x and JMX Authentication.
 
