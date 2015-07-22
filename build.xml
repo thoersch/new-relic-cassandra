@@ -17,6 +17,9 @@
     <property name="conf.dir" value="config" />
     <property name="dist.dir" location="dist" />
 
+    <property name="test.dir" location="test" />
+    <property name="test.lib.dir" location="test/lib" />
+
     <property name="sdk.jar" value="${lib.dir}/metrics_publish-2.0.1.jar" />
 
     <path id="classpath">
@@ -38,10 +41,29 @@
         <!--  Compile the java code  -->
         <echo>Building project...</echo>
         <mkdir dir="${build.classes.dir}"/>
-        <javac srcdir="${src.dir}" destdir="${build.classes.dir}" target="1.8" source="1.8">
+        <javac srcdir="." destdir="${build.classes.dir}" target="1.8" source="1.8">
             <classpath refid="classpath" />
+            <classpath location="${test.lib.dir}/junit-4.12.jar" />
+            <classpath location="${test.lib.dir}/hamcrest-core-1.3.jar" />
+            <classpath location="${test.lib.dir}/mockito-all-1.9.5.jar" />
         </javac>
         <echo>Done.</echo>
+    </target>
+
+    <target name="test" depends="compile">
+        <junit printsummary="true">
+            <classpath location="${test.lib.dir}/junit-4.12.jar" />
+            <classpath location="${test.lib.dir}/hamcrest-core-1.3.jar" />
+            <classpath location="${test.lib.dir}/mockito-all-1.9.5.jar" />
+            <classpath location="${lib.dir}/metrics_publish-2.0.1.jar" />
+            <classpath location="${build.classes.dir}" />
+            <batchtest>
+                <fileset dir="${test.dir}">
+                    <include name="**/*Test*" />
+                </fileset>
+            </batchtest>
+            <formatter type="brief" usefile="false"/>
+        </junit>
     </target>
 
     <target name="jar" depends="compile" description="create a jar file for the application">
