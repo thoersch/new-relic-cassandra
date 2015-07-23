@@ -64,7 +64,7 @@ public class JMXRunnerTest {
 
     @Test
     public void verifyRunnerTriesOtherHostsOnFailure() throws Exception {
-        jmxRunner = new JMXRunner(new ArrayList<String>() {{ add("127.0.0.1"); add("127.0.0.1"); add("127.0.0.1");}}, "7199", "username", "password");
+        jmxRunner = new JMXRunner(new ArrayList<String>() {{ add("1.2.3.4"); add("127.0.0.1"); add("127.0.0.1");}}, "7199", "username", "password");
 
         JMXTemplate template = mock(JMXTemplate.class);
 
@@ -72,7 +72,7 @@ public class JMXRunnerTest {
             jmxRunner.run(template);
             fail("Did not fail on all hosts");
         } catch (Exception e) {
-            assertEquals("All hosts (127.0.0.1,127.0.0.1,127.0.0.1) tried and failed to connect.", e.getMessage());
+            assertEquals("All hosts (1.2.3.4,127.0.0.1,127.0.0.1) tried and failed to connect.", e.getMessage());
         }
 
         verify(template, times(0)).execute(any(MBeanServerConnection.class), any(JMXRunner.class));

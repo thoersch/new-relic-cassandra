@@ -13,6 +13,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 public class JMXRunner {
@@ -21,6 +22,7 @@ public class JMXRunner {
     private final static String OBJECT_NAME_NAME = "name";
     private final static String OBJECT_NAME_TYPE = "type";
     private final static String OBJECT_NAME_SCOPE = "scope";
+    private final static long JMX_TIMEOUT_MILLIS = 2000L;
 
     private final List<String> hosts;
     private final String port;
@@ -43,10 +45,8 @@ public class JMXRunner {
                 JMXServiceURL address = new JMXServiceURL(String.format(JMX_URL_FORMAT, hosts.get(i), port));
                 try {
                     Map<String, String[]> environment = getEnvironmentMap();
-                    connector = environment == null
-                            ? JMXConnectorFactory.connect(address)
-                            : JMXConnectorFactory.connect(address, environment);
-                } catch (IOException ex) {
+                    connector = connectWithTimeout(address,environment, JMX_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+                } catch (ExecutionException|TimeoutException ex) {
                     if (i == (hosts.size() - 1)) {
                         throw new Exception(String.format("All hosts (%s) tried and failed to connect.", hosts.stream().collect(Collectors.joining(","))), ex);
                     }
@@ -84,14 +84,20 @@ public class JMXRunner {
         return connection.queryMBeans(objectName, null);
     }
 
+    private JMXConnector connectWithTimeout(JMXServiceURL url, Map<String, String[]> environment, long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        Future<JMXConnector> future = executor.submit(() -> JMXConnectorFactory.connect(url, environment));
+        return future.get(timeout, unit);
+    }
+
     private Map<String, String[]> getEnvironmentMap() {
-        if(username == null || password == null) {
-            return null;
+        Map<String, String[]> environment = new Hashtable<>();
+
+        if(username != null && password != null) {
+            String[] credentials = {username, password};
+            environment.put(JMXConnector.CREDENTIALS, credentials);
         }
 
-        Map<String, String[]> environment = new Hashtable<>();
-        String[] credentials = {username, password};
-        environment.put(JMXConnector.CREDENTIALS, credentials);
         return environment;
     }
 

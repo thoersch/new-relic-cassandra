@@ -41,7 +41,7 @@ Below is an example of the `plugin.json` file's contents, you can add multiple o
   "agents": [
     {
       "name": "Cassandra",
-      "host": "ip address of a cassandra node",
+      "host": "ip address of a cassandra node or comma delimited list",
       "port": "7199",
       "username": "optional jmx username",
       "password": "optional jmx password"
@@ -50,7 +50,12 @@ Below is an example of the `plugin.json` file's contents, you can add multiple o
 }
 ```
 
-**note** - The "name" attribute is used to identify specific instances in the New Relic UI. 
+**note** - The "name" attribute is used to identify specific instances in the New Relic UI.
+
+**note** - The "host" attribute can be a single instance or list. 
+Only one is required to get information on all hosts, but multiple are allow as a fall back if JMX fails to connect. 
+Each of these specified will require connectivity from the plugin.
+
 **note** - The "username" and "password" attributes can be left empty if not using JMX authentication
 
 #### Configuring the `newrelic.json` file: 
