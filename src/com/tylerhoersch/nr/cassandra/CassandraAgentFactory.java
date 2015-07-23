@@ -4,6 +4,8 @@ import com.newrelic.metrics.publish.Agent;
 import com.newrelic.metrics.publish.AgentFactory;
 import com.newrelic.metrics.publish.configuration.ConfigurationException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public class CassandraAgentFactory extends AgentFactory {
@@ -25,7 +27,13 @@ public class CassandraAgentFactory extends AgentFactory {
             throw new ConfigurationException(String.format("'%s', '%s' and '%s' cannot be null.", USERNAME, PASSWORD, PORT));
         }
 
-        return new CassandraAgent(name, new JMXRunner(host, port, username, password));
+        String[] hostsRaw = host.split(",");
+        List<String> hosts = new ArrayList<>();
+        for(String hostRaw : hostsRaw) {
+            hosts.add(hostRaw.trim());
+        }
+
+        return new CassandraAgent(name, new JMXRunner(hosts, port, username, password));
     }
 
     private boolean isNullOrEmpty(Object value) {

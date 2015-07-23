@@ -10,8 +10,10 @@ import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import java.io.IOException;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class JMXRunner {
     private final static Logger logger = Logger.getLogger(JMXRunner.class);
@@ -20,13 +22,13 @@ public class JMXRunner {
     private final static String OBJECT_NAME_TYPE = "type";
     private final static String OBJECT_NAME_SCOPE = "scope";
 
-    private final String host;
+    private final List<String> hosts;
     private final String port;
     private final String username;
     private final String password;
 
-    public JMXRunner(String host, String port, String username, String password) {
-        this.host = host;
+    public JMXRunner(List<String> hosts, String port, String username, String password) {
+        this.hosts = hosts;
         this.port = port;
         this.username = username;
         this.password = password;
@@ -37,17 +39,23 @@ public class JMXRunner {
         T value = null;
 
         try {
-            JMXServiceURL address = new JMXServiceURL(String.format(JMX_URL_FORMAT, host, port));
-            try {
-                Map<String, String[]> environment = getEnvironmentMap();
-                connector = environment == null
-                        ? JMXConnectorFactory.connect(address)
-                        : JMXConnectorFactory.connect(address, environment);
-            } catch (IOException ex) {
-                throw new Exception(host, ex);
+            for(int i = 0; i < hosts.size(); i++) {
+                JMXServiceURL address = new JMXServiceURL(String.format(JMX_URL_FORMAT, hosts.get(i), port));
+                try {
+                    Map<String, String[]> environment = getEnvironmentMap();
+                    connector = environment == null
+                            ? JMXConnectorFactory.connect(address)
+                            : JMXConnectorFactory.connect(address, environment);
+                } catch (IOException ex) {
+                    if (i == (hosts.size() - 1)) {
+                        throw new Exception(String.format("All hosts (%s) tried and failed to connect.", hosts.stream().collect(Collectors.joining(","))), ex);
+                    }
+                    continue;
+                }
+                MBeanServerConnection connection = connector.getMBeanServerConnection();
+                value = template.execute(connection, this);
+                break;
             }
-            MBeanServerConnection connection = connector.getMBeanServerConnection();
-            value = template.execute(connection, this);
         } catch (Exception e) {
             logger.error(e);
             throw e;

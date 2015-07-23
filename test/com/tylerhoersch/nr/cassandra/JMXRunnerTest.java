@@ -10,11 +10,14 @@ import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.QueryExp;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -24,7 +27,7 @@ public class JMXRunnerTest {
 
     @Before
     public void setup() {
-        jmxRunner = new JMXRunner("127.0.0.1", "7199", "username", "password");
+        jmxRunner = new JMXRunner(new ArrayList<String>() {{ add("127.0.0.1");}}, "7199", "username", "password");
     }
 
     @Test
@@ -38,15 +41,12 @@ public class JMXRunnerTest {
     @Test
     public void verifyObjectNameCreation() throws Exception {
         Object attribute = jmxRunner.getAttribute(mBeanServerConnection, "domain", "name", "type", "scope", "attribute");
-        when(mBeanServerConnection.queryMBeans(any(ObjectName.class), any(QueryExp.class))).then(new Answer<Object>() {
-            @Override
-            public Object answer(InvocationOnMock invocation) throws Throwable {
-                ObjectName objectName = (ObjectName)invocation.getArguments()[0];
-                assertEquals("name", objectName.getKeyProperty("name"));
-                assertEquals("type", objectName.getKeyProperty("type"));
-                assertEquals("scope", objectName.getKeyProperty("scope"));
-                return null;
-            }
+        when(mBeanServerConnection.queryMBeans(any(ObjectName.class), any(QueryExp.class))).then(invocation -> {
+            ObjectName objectName = (ObjectName) invocation.getArguments()[0];
+            assertEquals("name", objectName.getKeyProperty("name"));
+            assertEquals("type", objectName.getKeyProperty("type"));
+            assertEquals("scope", objectName.getKeyProperty("scope"));
+            return null;
         });
     }
 
@@ -60,5 +60,21 @@ public class JMXRunnerTest {
 
         verify(mBeanServerConnection, times(1)).queryMBeans(objectName, null);
         verify(mBeanServerConnection, times(1)).getAttribute(objectName, "attribute");
+    }
+
+    @Test
+    public void verifyRunnerTriesOtherHostsOnFailure() throws Exception {
+        jmxRunner = new JMXRunner(new ArrayList<String>() {{ add("127.0.0.1"); add("127.0.0.1"); add("127.0.0.1");}}, "7199", "username", "password");
+
+        JMXTemplate template = mock(JMXTemplate.class);
+
+        try {
+            jmxRunner.run(template);
+            fail("Did not fail on all hosts");
+        } catch (Exception e) {
+            assertEquals("All hosts (127.0.0.1,127.0.0.1,127.0.0.1) tried and failed to connect.", e.getMessage());
+        }
+
+        verify(template, times(0)).execute(any(MBeanServerConnection.class), any(JMXRunner.class));
     }
 }

@@ -4,6 +4,7 @@ import com.newrelic.metrics.publish.configuration.ConfigurationException;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,6 +39,22 @@ public class CassandraAgentFactoryTest {
     public void verifyMissingCredentialsReturnsValidAgent() throws ConfigurationException {
         configuration.remove("username");
         configuration.remove("password");
+        CassandraAgent cassandraAgent = (CassandraAgent) cassandraAgentFactory.createConfiguredAgent(configuration);
+
+        assertNotNull(cassandraAgent);
+    }
+
+    @Test
+    public void verifyMultipleHostsWithoutSpacesReturnsValidAgent() throws ConfigurationException {
+        configuration.put("host", "1.2.3.4,5.6.7.8,9.8.7.6");
+        CassandraAgent cassandraAgent = (CassandraAgent) cassandraAgentFactory.createConfiguredAgent(configuration);
+
+        assertNotNull(cassandraAgent);
+    }
+
+    @Test
+    public void verifyMultipleHostsWithSpacesReturnsValidAgent() throws ConfigurationException {
+        configuration.put("host", "1.2.3.4, 5.6.7.8, 9.8.7.6");
         CassandraAgent cassandraAgent = (CassandraAgent) cassandraAgentFactory.createConfiguredAgent(configuration);
 
         assertNotNull(cassandraAgent);
