@@ -6,22 +6,35 @@ import com.tylerhoersch.nr.cassandra.templates.Cassandra2xFailures;
 import com.tylerhoersch.nr.cassandra.templates.Cassandra2xInstances;
 import com.tylerhoersch.nr.cassandra.templates.Cassandra2xMetrics;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class CassandraAgent extends Agent {
     private static final Logger logger = Logger.getLogger(CassandraAgent.class);
     private static final String GUID = "com.tylerhoersch.nr.cassandra";
     private static final String VERSION = "1.0.0";
+    private final JMXRunnerFactory jmxRunnerFactory;
     private final String name;
-    private final JMXRunner jmxRunner;
+    private final List<String> hosts;
+    private final String port;
+    private final String username;
+    private final String password;
 
-    public CassandraAgent(String name, JMXRunner jmxRunner) {
+    public CassandraAgent(JMXRunnerFactory jmxRunnerFactory,
+                          String name,
+                          List<String> hosts,
+                          String port,
+                          String username,
+                          String password) {
         super(GUID, VERSION);
 
+        this.jmxRunnerFactory = jmxRunnerFactory;
         this.name = name;
-        this.jmxRunner = jmxRunner;
+        this.hosts = hosts;
+        this.port = port;
+        this.username = username;
+        this.password = password;
     }
 
     @Override
@@ -33,13 +46,14 @@ public class CassandraAgent extends Agent {
     public void pollCycle() {
         List<Metric> metrics = new ArrayList<>();
         try {
-            List<String> cassandraInstances = getCassandraInstances();
+            JMXRunner jmxRunner = jmxRunnerFactory.createJMXRunner(hosts, port, username, password);
+            Map<String, Boolean> instances = getCassandraInstances(jmxRunner);
+            metrics.addAll(getCassandraFailures(jmxRunner, instances));
 
-            for(String instance : cassandraInstances) {
-                metrics.addAll(getCassandraMetrics(instance));
+            for(String instance : instances.keySet()) {
+                jmxRunner = jmxRunnerFactory.createJMXRunner(instance, port, username, password);
+                metrics.addAll(getCassandraMetrics(jmxRunner, instance));
             }
-
-            metrics.addAll(getCassandraFailures());
 
             metrics.stream()
                     .filter(m -> m.getValue() != null && !m.getValue().toString().equals("NaN"))
@@ -49,15 +63,15 @@ public class CassandraAgent extends Agent {
         }
     }
 
-    private List<Metric> getCassandraFailures() throws Exception {
-        return jmxRunner.run(new Cassandra2xFailures());
+    private List<Metric> getCassandraFailures(JMXRunner jmxRunner, Map<String, Boolean> instancesStates) throws Exception {
+        return jmxRunner.run(new Cassandra2xFailures(instancesStates));
     }
 
-    private List<String> getCassandraInstances() throws Exception {
+    private Map<String, Boolean> getCassandraInstances(JMXRunner jmxRunner) throws Exception {
         return jmxRunner.run(new Cassandra2xInstances());
     }
 
-    private List<Metric> getCassandraMetrics(String instance) throws Exception {
+    private List<Metric> getCassandraMetrics(JMXRunner jmxRunner, String instance) throws Exception {
         return jmxRunner.run(new Cassandra2xMetrics(instance));
     }
 }

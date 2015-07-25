@@ -7,13 +7,16 @@ import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 public class CassandraAgentTest {
 
+    private JMXRunnerFactory jmxRunnerFactory = mock(JMXRunnerFactory.class);
     private JMXRunner jmxRunner = mock(JMXRunner.class);
     private CassandraAgent cassandraAgent;
 
@@ -21,14 +24,17 @@ public class CassandraAgentTest {
     public void verifyMetricReportingForAllHosts() throws Exception {
         List<Metric> failures = new ArrayList<>();
         failures.add(new Metric("f1", "v1", 0));
-        List<String> instances = new ArrayList<>();
-        instances.add("1.2.3.4");
-        instances.add("2.2.3.2");
+        Map<String, Boolean> instances = new HashMap<>();
+        instances.put("1.2.3.4", true);
+        instances.put("2.2.3.2", false);
+
         List<Metric> metrics = new ArrayList<>();
         metrics.add(new Metric("m1", "v1", new BigDecimal(3.14)));
         metrics.add(new Metric("m2", "v2", 123L));
         metrics.add(new Metric("m3", "v3", 5));
-        cassandraAgent = spy(new CassandraAgent("junit", jmxRunner));
+        when(jmxRunnerFactory.createJMXRunner(any(String.class), any(String.class), any(String.class), any(String.class))).thenReturn(jmxRunner);
+        when(jmxRunnerFactory.createJMXRunner(any(List.class), any(String.class), any(String.class), any(String.class))).thenReturn(jmxRunner);
+        cassandraAgent = spy(new CassandraAgent(jmxRunnerFactory, "junit", new ArrayList<>(instances.keySet()), "7199", "", ""));
         doNothing().when(cassandraAgent).reportMetric(any(String.class), any(String.class), any(Number.class));
         when(jmxRunner.run(any(JMXTemplate.class))).thenAnswer((mock) -> {
             // required since mockito was not giving unique results for
