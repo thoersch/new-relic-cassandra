@@ -25,7 +25,7 @@ public class Cassandra2xInstances implements JMXTemplate<Map<String, Boolean>> {
             return instances;
         }
 
-        states.entrySet().stream().map(s -> instances.put(s.getKey().substring(s.getKey().indexOf("/"+1)), s.getValue().equals(UP)));
+        states.entrySet().stream().forEach(s -> instances.put(s.getKey().substring(s.getKey().indexOf("/")+1), s.getValue().equals(UP)));
 
         return instances;
     }
