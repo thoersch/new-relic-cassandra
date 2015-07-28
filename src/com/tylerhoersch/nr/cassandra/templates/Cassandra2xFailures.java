@@ -28,7 +28,7 @@ public class Cassandra2xFailures implements JMXTemplate<List<Metric>> {
         metrics.add(new Metric(DOWNTIME_GLOBAL, COUNT, downEndpointCount));
 
         for(Map.Entry<String, Boolean> instance : instancesStates.entrySet()) {
-            Metric metric = new Metric(String.format(DOWNTIME_INSTANCE, instance.getKey()), COUNT, instance.getValue() ? 1 : 0);
+            Metric metric = new Metric(String.format(DOWNTIME_INSTANCE, instance.getKey()), COUNT, instance.getValue() ? 0 : 1);
             metrics.add(metric);
         }
 
