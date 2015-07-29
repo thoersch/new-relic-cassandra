@@ -21,6 +21,10 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
     private static final String WRITE_LATENCY_GLOBAL = "Cassandra/global/Latency/Writes";
     private static final String READ_TIMEOUTS = "Cassandra/hosts/%s/Timeouts/Reads";
     private static final String WRITE_TIMEOUTS = "Cassandra/hosts/%s/Timeouts/Writes";
+    private static final String READ_LATENCY_TOTAL_INSTANCE = "Cassandra/hosts/%s/LatencyTotal/Reads";
+    private static final String WRITE_LATENCY_TOTAL_INSTANCE = "Cassandra/hosts/%s/LatencyTotal/Writes";
+    private static final String READ_UNAVAILABLE_REQUESTS_INSTANCE = "Cassandra/hosts/%s/Unavailables/Reads";
+    private static final String WRITE_UNAVAILABLE_REQUESTS_INSTANCE = "Cassandra/hosts/%s/Unavailables/Writes";
 
     private static final String COMPACTION_PENDING_TASKS = "Cassandra/hosts/%s/Compaction/PendingTasks";
     private static final String MEMTABLE_PENDING_TASKS = "Cassandra/hosts/%s/MemtableFlush/PendingTasks";
@@ -36,12 +40,14 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
     private static final String KEY_CACHE_SIZE_GLOBAL = "Cassandra/global/Cache/KeyCache/Size";
     private static final String KEY_CACHE_ENTRIES_INSTANCE = "Cassandra/hosts/%s/Cache/KeyCache/Entries";
     private static final String KEY_CACHE_ENTRIES_GLOBAL = "Cassandra/global/Cache/KeyCache/Entries";
+    private static final String KEY_CACHE_REQUESTS_INSTANCE = "Cassandra/hosts/%s/Cache/KeyCache/Requests";
     private static final String ROW_CACHE_HIT_RATE_INSTANCE = "Cassandra/hosts/%s/Cache/RowCache/HitRate";
     private static final String ROW_CACHE_HIT_RATE_GLOBAL = "Cassandra/global/Cache/RowCache/HitRate";
     private static final String ROW_CACHE_SIZE_INSTANCE = "Cassandra/hosts/%s/Cache/RowCache/Size";
     private static final String ROW_CACHE_SIZE_GLOBAL = "Cassandra/global/Cache/RowCache/Size";
     private static final String ROW_CACHE_ENTRIES_INSTANCE = "Cassandra/hosts/%s/Cache/RowCache/Entries";
     private static final String ROW_CACHE_ENTRIES_GLOBAL = "Cassandra/global/Cache/RowCache/Entries";
+    private static final String ROW_CACHE_REQUESTS_INSTANCE = "Cassandra/hosts/%s/Cache/RowCache/Requests";
 
     private static final String MILLIS = "millis";
     private static final String RATE = "rate";
@@ -85,6 +91,9 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
         metrics.add(new Metric(String.format(KEY_CACHE_ENTRIES_INSTANCE, instance), COUNT, keyCacheEntries));
         metrics.add(new Metric(KEY_CACHE_ENTRIES_GLOBAL, COUNT, keyCacheEntries));
 
+        Double keyCacheRequestsRate = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Requests", "Cache", "KeyCache", "OneMinuteRate");
+        metrics.add(new Metric(String.format(KEY_CACHE_REQUESTS_INSTANCE, instance), RATE, keyCacheRequestsRate));
+
         Double rowCacheHitRate = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "HitRate", "Cache", "RowCache", "Value");
         metrics.add(new Metric(String.format(ROW_CACHE_HIT_RATE_INSTANCE, instance), RATE, rowCacheHitRate));
         metrics.add(new Metric(ROW_CACHE_HIT_RATE_GLOBAL, RATE, rowCacheHitRate));
@@ -96,6 +105,9 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
         Integer rowCacheEntries = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Entries", "Cache", "RowCache", "Value");
         metrics.add(new Metric(String.format(ROW_CACHE_ENTRIES_INSTANCE, instance), COUNT, rowCacheEntries));
         metrics.add(new Metric(ROW_CACHE_ENTRIES_GLOBAL, COUNT, rowCacheEntries));
+
+        Double rowCacheRequestsRate = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Requests", "Cache", "RowCache", "OneMinuteRate");
+        metrics.add(new Metric(String.format(ROW_CACHE_REQUESTS_INSTANCE, instance), RATE, rowCacheRequestsRate));
 
         return metrics;
     }
@@ -143,6 +155,20 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
 
         Long writeTimeouts = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Timeouts", "ClientRequest", "Write", "Count");
         metrics.add(new Metric(String.format(WRITE_TIMEOUTS, instance), COUNT, writeTimeouts));
+
+        Double totalReadLatency = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "TotalLatency", "ClientRequest", "Read", "Count");
+        metrics.add(new Metric(String.format(READ_LATENCY_TOTAL_INSTANCE, instance), MILLIS, toMillis(totalReadLatency, TimeUnit.MICROSECONDS)));
+
+        Double totalWriteLatency = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "TotalLatency", "ClientRequest", "Write", "Count");
+        metrics.add(new Metric(String.format(WRITE_LATENCY_TOTAL_INSTANCE, instance), MILLIS, toMillis(totalWriteLatency, TimeUnit.MICROSECONDS)));
+
+        Double readUnavailableRequests = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Unavailables", "ClientRequest", "Read", "MeanRate");
+        TimeUnit readUnavailableRequestsUnits = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Unavailables", "ClientRequest", "Read", "RateUnit");
+        metrics.add(new Metric(String.format(READ_UNAVAILABLE_REQUESTS_INSTANCE, instance), MILLIS, toMillis(readUnavailableRequests, readUnavailableRequestsUnits)));
+
+        Double writeUnavailableRequests = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Unavailables", "ClientRequest", "Write", "MeanRate");
+        TimeUnit writeUnavailableRequestsUnits = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Unavailables", "ClientRequest", "Write", "RateUnit");
+        metrics.add(new Metric(String.format(WRITE_UNAVAILABLE_REQUESTS_INSTANCE, instance), MILLIS, toMillis(writeUnavailableRequests, writeUnavailableRequestsUnits)));
 
         return metrics;
     }

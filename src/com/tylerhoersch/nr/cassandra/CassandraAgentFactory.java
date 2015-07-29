@@ -33,7 +33,7 @@ public class CassandraAgentFactory extends AgentFactory {
             hosts.add(hostRaw.trim());
         }
 
-        return new CassandraAgent(new JMXRunnerFactory(),name, hosts, port, username, password);
+        return new CassandraAgent(new JMXRunnerFactory(), name, hosts, port, username, password);
     }
 
     private boolean isNullOrEmpty(Object value) {
