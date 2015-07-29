@@ -156,11 +156,11 @@ public class Cassandra2xMetrics implements JMXTemplate<List<Metric>> {
         Long writeTimeouts = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Timeouts", "ClientRequest", "Write", "Count");
         metrics.add(new Metric(String.format(WRITE_TIMEOUTS, instance), COUNT, writeTimeouts));
 
-        Double totalReadLatency = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "TotalLatency", "ClientRequest", "Read", "Count");
-        metrics.add(new Metric(String.format(READ_LATENCY_TOTAL_INSTANCE, instance), MILLIS, toMillis(totalReadLatency, TimeUnit.MICROSECONDS)));
+        Long totalReadLatency = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "TotalLatency", "ClientRequest", "Read", "Count");
+        metrics.add(new Metric(String.format(READ_LATENCY_TOTAL_INSTANCE, instance), MILLIS, totalReadLatency * 0.001));
 
-        Double totalWriteLatency = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "TotalLatency", "ClientRequest", "Write", "Count");
-        metrics.add(new Metric(String.format(WRITE_LATENCY_TOTAL_INSTANCE, instance), MILLIS, toMillis(totalWriteLatency, TimeUnit.MICROSECONDS)));
+        Long totalWriteLatency = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "TotalLatency", "ClientRequest", "Write", "Count");
+        metrics.add(new Metric(String.format(WRITE_LATENCY_TOTAL_INSTANCE, instance), MILLIS, totalWriteLatency * 0.001));
 
         Double readUnavailableRequests = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Unavailables", "ClientRequest", "Read", "MeanRate");
         TimeUnit readUnavailableRequestsUnits = jmxRunner.getAttribute(connection, "org.apache.cassandra.metrics", "Unavailables", "ClientRequest", "Read", "RateUnit");
