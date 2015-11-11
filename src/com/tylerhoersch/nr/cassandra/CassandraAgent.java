@@ -51,8 +51,12 @@ public class CassandraAgent extends Agent {
             metrics.addAll(getCassandraFailures(jmxRunner, instances));
 
             for(String instance : instances.keySet()) {
-                jmxRunner = jmxRunnerFactory.createJMXRunner(instance, port, username, password);
-                metrics.addAll(getCassandraMetrics(jmxRunner, instance));
+            	// Only collect Cassandra metrics if Cassandra node is up. Otherwise exception will be thrown
+            	// and the rest of metrics will not be pushed to New Relic
+            	if (instances.get(instance).booleanValue()) {
+                	jmxRunner = jmxRunnerFactory.createJMXRunner(instance, port, username, password);
+                    metrics.addAll(getCassandraMetrics(jmxRunner, instance));
+            	}            	
             }
 
             metrics.stream().filter(m -> m.getValue() != null && !m.getValue().toString().equals("NaN"))
