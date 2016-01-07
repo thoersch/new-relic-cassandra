@@ -5,10 +5,7 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import javax.management.MBeanServerConnection;
-import javax.management.ObjectInstance;
-import javax.management.ObjectName;
-import javax.management.QueryExp;
+import javax.management.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -33,14 +30,16 @@ public class JMXRunnerTest {
     @Test
     public void verifyQueryWithNoMBeansReturnsNull() throws Exception {
         when(mBeanServerConnection.queryMBeans(any(ObjectName.class), any(QueryExp.class))).thenReturn(new HashSet<ObjectInstance>());
-        Object attribute = jmxRunner.getAttribute(mBeanServerConnection, "domain", "name", "type", "scope", "attribute");
+        JMXRequest request = new JMXRequest.JMXRequestBuilder("domain").name("name").type("type").scope("scope").attribute("attribute").build();
+        Object attribute = jmxRunner.getAttribute(mBeanServerConnection, request);
 
         assertNull(attribute);
     }
 
     @Test
     public void verifyObjectNameCreation() throws Exception {
-        Object attribute = jmxRunner.getAttribute(mBeanServerConnection, "domain", "name", "type", "scope", "attribute");
+        JMXRequest request = new JMXRequest.JMXRequestBuilder("domain").name("name").type("type").scope("scope").attribute("attribute").build();
+        Object attribute = jmxRunner.getAttribute(mBeanServerConnection, request);
         when(mBeanServerConnection.queryMBeans(any(ObjectName.class), any(QueryExp.class))).then(invocation -> {
             ObjectName objectName = (ObjectName) invocation.getArguments()[0];
             assertEquals("name", objectName.getKeyProperty("name"));
@@ -52,11 +51,12 @@ public class JMXRunnerTest {
 
     @Test
     public void verifyQueryWithBeansCallsForAttributes() throws Exception {
-        final ObjectName objectName = new ObjectName("domain", "key", "value");
+        final JMXRequest request = new JMXRequest.JMXRequestBuilder("domain").name("value").attribute("attribute").build();
+        final ObjectName objectName = new ObjectName("domain", "name", "value");
         Set<ObjectInstance> instances = new HashSet<>();
         instances.add(new ObjectInstance(objectName, "Object"));
         when(mBeanServerConnection.queryMBeans(any(ObjectName.class), any(QueryExp.class))).thenReturn(instances);
-        jmxRunner.getAttribute(mBeanServerConnection, objectName, "attribute");
+        jmxRunner.getAttribute(mBeanServerConnection, request);
 
         verify(mBeanServerConnection, times(1)).queryMBeans(objectName, null);
         verify(mBeanServerConnection, times(1)).getAttribute(objectName, "attribute");

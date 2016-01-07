@@ -1,8 +1,8 @@
 package com.tylerhoersch.nr.cassandra;
 
-import com.tylerhoersch.nr.cassandra.templates.Cassandra2xFailures;
-import com.tylerhoersch.nr.cassandra.templates.Cassandra2xInstances;
-import com.tylerhoersch.nr.cassandra.templates.Cassandra2xMetrics;
+import com.tylerhoersch.nr.cassandra.templates.CassandraFailures;
+import com.tylerhoersch.nr.cassandra.templates.CassandraInstances;
+import com.tylerhoersch.nr.cassandra.templates.CassandraMetrics;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -18,6 +18,7 @@ public class CassandraAgentTest {
 
     private JMXRunnerFactory jmxRunnerFactory = mock(JMXRunnerFactory.class);
     private JMXRunner jmxRunner = mock(JMXRunner.class);
+    private AttributeJMXRequestMapper mapper = mock(AttributeJMXRequestMapper.class);
     private CassandraAgent cassandraAgent;
 
     @Test
@@ -34,17 +35,17 @@ public class CassandraAgentTest {
         metrics.add(new Metric("m3", "v3", 5));
         when(jmxRunnerFactory.createJMXRunner(any(String.class), any(String.class), any(String.class), any(String.class))).thenReturn(jmxRunner);
         when(jmxRunnerFactory.createJMXRunner(any(List.class), any(String.class), any(String.class), any(String.class))).thenReturn(jmxRunner);
-        cassandraAgent = spy(new CassandraAgent(jmxRunnerFactory, "junit", new ArrayList<>(instances.keySet()), "7199", "", ""));
+        cassandraAgent = spy(new CassandraAgent(jmxRunnerFactory, "junit", new ArrayList<>(instances.keySet()), "7199", "", "", mapper));
         doNothing().when(cassandraAgent).reportMetric(any(String.class), any(String.class), any(Number.class));
         when(jmxRunner.run(any(JMXTemplate.class))).thenAnswer((mock) -> {
             // required since mockito was not giving unique results for
             // any(Cassandr2xIntances.class) vs. any(Cassandra2xMetrics.class)
             Object template = mock.getArguments()[0];
-            if(template instanceof Cassandra2xInstances) {
+            if(template instanceof CassandraInstances) {
                 return instances;
-            } else if (template instanceof Cassandra2xMetrics) {
+            } else if (template instanceof CassandraMetrics) {
                 return metrics;
-            } else if (template instanceof Cassandra2xFailures) {
+            } else if (template instanceof CassandraFailures) {
                 return failures;
             } else {
                 throw new Exception("Unsupported template type");

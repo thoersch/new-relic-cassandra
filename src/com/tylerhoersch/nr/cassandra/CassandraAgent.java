@@ -2,9 +2,9 @@ package com.tylerhoersch.nr.cassandra;
 
 import com.newrelic.metrics.publish.Agent;
 import com.newrelic.metrics.publish.util.Logger;
-import com.tylerhoersch.nr.cassandra.templates.Cassandra2xFailures;
-import com.tylerhoersch.nr.cassandra.templates.Cassandra2xInstances;
-import com.tylerhoersch.nr.cassandra.templates.Cassandra2xMetrics;
+import com.tylerhoersch.nr.cassandra.templates.CassandraFailures;
+import com.tylerhoersch.nr.cassandra.templates.CassandraInstances;
+import com.tylerhoersch.nr.cassandra.templates.CassandraMetrics;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +13,9 @@ import java.util.Map;
 public class CassandraAgent extends Agent {
     private static final Logger logger = Logger.getLogger(CassandraAgent.class);
     private static final String GUID = "com.tylerhoersch.nr.cassandra";
-    private static final String VERSION = "1.0.0";
+    private static final String VERSION = "2.0.0";
     private final JMXRunnerFactory jmxRunnerFactory;
+    private final AttributeJMXRequestMapper mapper;
     private final String name;
     private final List<String> hosts;
     private final String port;
@@ -26,7 +27,8 @@ public class CassandraAgent extends Agent {
                           List<String> hosts,
                           String port,
                           String username,
-                          String password) {
+                          String password,
+                          AttributeJMXRequestMapper mapper) {
         super(GUID, VERSION);
 
         this.jmxRunnerFactory = jmxRunnerFactory;
@@ -35,6 +37,7 @@ public class CassandraAgent extends Agent {
         this.port = port;
         this.username = username;
         this.password = password;
+        this.mapper = mapper;
     }
 
     @Override
@@ -63,14 +66,14 @@ public class CassandraAgent extends Agent {
     }
 
     private List<Metric> getCassandraFailures(JMXRunner jmxRunner, Map<String, Boolean> instancesStates) throws Exception {
-        return jmxRunner.run(new Cassandra2xFailures(instancesStates));
+        return jmxRunner.run(new CassandraFailures(instancesStates, mapper));
     }
 
     private Map<String, Boolean> getCassandraInstances(JMXRunner jmxRunner) throws Exception {
-        return jmxRunner.run(new Cassandra2xInstances());
+        return jmxRunner.run(new CassandraInstances(mapper));
     }
 
     private List<Metric> getCassandraMetrics(JMXRunner jmxRunner, String instance) throws Exception {
-        return jmxRunner.run(new Cassandra2xMetrics(instance));
+        return jmxRunner.run(new CassandraMetrics(instance, mapper));
     }
 }

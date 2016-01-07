@@ -63,12 +63,15 @@ public class JMXRunner {
         return value;
     }
 
-    public <T> T getAttribute(MBeanServerConnection connection, String domain, String name, String type, String scope, String attribute) throws Exception {
-        return getAttribute(connection, createObjectName(domain, name, type, scope), attribute);
+    public <T> T getAttribute(MBeanServerConnection connection, JMXRequest request) throws Exception {
+        if(request == null) {
+            return null;
+        }
+        return getAttribute(connection, createObjectName(request), request.getAttribute());
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T getAttribute(MBeanServerConnection connection, ObjectName objectName, String attribute) throws Exception {
+    private <T> T getAttribute(MBeanServerConnection connection, ObjectName objectName, String attribute) throws Exception {
         Set<ObjectInstance> instances = queryConnectionBy(connection, objectName);
         if(instances == null || instances.size() == 0) {
             return null;
@@ -110,12 +113,12 @@ public class JMXRunner {
         }
     }
 
-    private ObjectName createObjectName(String domain, String name, String type, String scope) throws Exception {
+    private ObjectName createObjectName(JMXRequest request) throws Exception {
         Hashtable<String,String> table = new Hashtable<>();
-        if (name != null) table.put(OBJECT_NAME_NAME, name);
-        if (type != null) table.put(OBJECT_NAME_TYPE, type);
-        if (scope != null) table.put(OBJECT_NAME_SCOPE, scope);
-        return ObjectName.getInstance(domain, table);
+        if (request.getName() != null) table.put(OBJECT_NAME_NAME, request.getName());
+        if (request.getType() != null) table.put(OBJECT_NAME_TYPE, request.getType());
+        if (request.getScope() != null) table.put(OBJECT_NAME_SCOPE, request.getScope());
+        return ObjectName.getInstance(request.getDomain(), table);
     }
 
 }
