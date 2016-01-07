@@ -1,7 +1,7 @@
 # New Relic Cassandra Plugin - Java
 [![Build Status](https://travis-ci.org/thoersch/new-relic-cassandra.svg?branch=master)](https://travis-ci.org/thoersch/new-relic-cassandra)
 
-Plugin is currently work in progress, with the focus of supporting Cassandra 2.x and JMX Authentication.
+Plugin is currently work in progress, with the focus of supporting Cassandra 2.x/3.x and JMX Authentication.
 
 More metrics coming!
 
@@ -12,7 +12,7 @@ More metrics coming!
 - A New Relic account. Sign up for a free account [here](http://newrelic.com)
 - Java Runtime (JRE) environment Version 1.8+
 - Network access to New Relic
-- Cassandra 2.x+
+- Cassandra 2.x/3.x
 
 ----
 
@@ -44,7 +44,8 @@ Below is an example of the `plugin.json` file's contents, you can add multiple o
       "host": "ip address of a cassandra node or comma delimited list",
       "port": "7199",
       "username": "optional jmx username",
-      "password": "optional jmx password"
+      "password": "optional jmx password",
+      "version": "2 or 3"
     }
   ]
 }

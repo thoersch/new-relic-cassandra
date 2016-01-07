@@ -5,7 +5,7 @@
       "host": "ip address of a cassandra node or comma delimited list",
       "port": "7199",
       "username": "optional jmx username",
-      "password": "optional jmx password"
+      "password": "optional jmx password",
       "version": "2 or 3"
     }
   ]
