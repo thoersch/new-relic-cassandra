@@ -48,6 +48,9 @@ public class JMXRunner {
                         throw new Exception(String.format("All hosts (%s) tried and failed to connect.", hosts.stream().collect(Collectors.joining(","))), ex);
                     }
                     continue;
+                } catch (Exception e) {
+                    logger.error(e);
+                    continue;
                 }
                 MBeanServerConnection connection = connector.getMBeanServerConnection();
                 value = template.execute(connection, this);
