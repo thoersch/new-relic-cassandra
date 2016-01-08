@@ -54,8 +54,10 @@ public class CassandraAgent extends Agent {
             metrics.addAll(getCassandraFailures(jmxRunner, instances));
 
             for(String instance : instances.keySet()) {
-                jmxRunner = jmxRunnerFactory.createJMXRunner(instance, port, username, password);
-                metrics.addAll(getCassandraMetrics(jmxRunner, instance));
+                if (instances.get(instance).booleanValue()) {
+                    jmxRunner = jmxRunnerFactory.createJMXRunner(instance, port, username, password);
+                    metrics.addAll(getCassandraMetrics(jmxRunner, instance));
+                }
             }
 
             metrics.stream().filter(m -> m.getValue() != null && !m.getValue().toString().equals("NaN"))
