@@ -144,12 +144,12 @@ public class CassandraMetrics implements JMXTemplate<List<Metric>> {
         List<Metric> metrics = new ArrayList<>();
 
         Double readMean = jmxRunner.getAttribute(connection, attributeMap.get(AttributeType.READ_LATENCY_MEAN));
-        TimeUnit readMeanUnits = jmxRunner.getAttribute(connection, attributeMap.get(AttributeType.READ_LATENCY_UNIT));
+        TimeUnit readMeanUnits = TimeUnitUtility.getTimeUnit(jmxRunner.getAttribute(connection, attributeMap.get(AttributeType.READ_LATENCY_UNIT)));
         metrics.add(new Metric(String.format(READ_LATENCY_INSTANCE, instance), MILLIS, TimeUnitUtility.toMillis(readMean, readMeanUnits)));
         metrics.add(new Metric(READ_LATENCY_GLOBAL, MILLIS, TimeUnitUtility.toMillis(readMean, readMeanUnits)));
 
         Double writeMean = jmxRunner.getAttribute(connection, attributeMap.get(AttributeType.WRITE_LATENCY_MEAN));
-        TimeUnit writeMeanUnits = jmxRunner.getAttribute(connection, attributeMap.get(AttributeType.WRITE_LATENCY_UNIT));
+        TimeUnit writeMeanUnits = TimeUnitUtility.getTimeUnit(jmxRunner.getAttribute(connection, attributeMap.get(AttributeType.WRITE_LATENCY_UNIT)));
         metrics.add(new Metric(String.format(WRITE_LATENCY_INSTANCE, instance), MILLIS, TimeUnitUtility.toMillis(writeMean, writeMeanUnits)));
         metrics.add(new Metric(WRITE_LATENCY_GLOBAL, MILLIS, TimeUnitUtility.toMillis(writeMean, writeMeanUnits)));
 
@@ -166,14 +166,12 @@ public class CassandraMetrics implements JMXTemplate<List<Metric>> {
         metrics.add(new Metric(String.format(WRITE_LATENCY_TOTAL_INSTANCE, instance), MILLIS, totalWriteLatency * 0.001));
 
         Double readUnavailableRequests = jmxRunner.getAttribute(connection, attributeMap.get(AttributeType.READ_UNAVAILABLE_REQUESTS));
-        String readUnits = jmxRunner.getAttribute(connection, attributeMap.get(AttributeType.READ_UNAVAILABLE_REQUESTS_UNIT));
-
-        TimeUnit readUnavailableRequestsUnits = TimeUnitUtility.cleanUnitsString(readUnits);
+        TimeUnit readUnavailableRequestsUnits = TimeUnitUtility.getTimeUnit(jmxRunner.getAttribute(connection, attributeMap.get(AttributeType.READ_UNAVAILABLE_REQUESTS_UNIT)));
         metrics.add(new Metric(String.format(READ_UNAVAILABLE_REQUESTS_INSTANCE, instance), MILLIS, TimeUnitUtility.toMillis(readUnavailableRequests, readUnavailableRequestsUnits)));
 
         Double writeUnavailableRequests = jmxRunner.getAttribute(connection, attributeMap.get(AttributeType.WRITE_UNAVAILABLE_REQUESTS));
-        String writeUnits = jmxRunner.getAttribute(connection, attributeMap.get(AttributeType.WRITE_UNAVAILABLE_REQUESTS_UNIT));
-        TimeUnit writeUnavailableRequestsUnits = TimeUnitUtility.cleanUnitsString(writeUnits);
+
+        TimeUnit writeUnavailableRequestsUnits = TimeUnitUtility.getTimeUnit(jmxRunner.getAttribute(connection, attributeMap.get(AttributeType.WRITE_UNAVAILABLE_REQUESTS_UNIT)));
         metrics.add(new Metric(String.format(WRITE_UNAVAILABLE_REQUESTS_INSTANCE, instance), MILLIS, TimeUnitUtility.toMillis(writeUnavailableRequests, writeUnavailableRequestsUnits)));
 
         return metrics;

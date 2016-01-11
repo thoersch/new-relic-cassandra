@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit;
 
 public class TimeUnitUtility {
 
-    private static final String EVENTS_DELIMITER = "events/";
+    private static final String EVENTS_DELIMITER = "EVENTS/";
 
     public static Double toMillis(Double sourceValue, TimeUnit sourceUnit) {
         if(sourceUnit == null || sourceValue == null) {
@@ -35,12 +35,23 @@ public class TimeUnitUtility {
         if(units == null) {
             return TimeUnit.SECONDS;
         }
+        units = units.toUpperCase();
 
         if(units.contains(EVENTS_DELIMITER)) {
             units = units.substring(EVENTS_DELIMITER.length());
-            units += "s";
+            units += "S";
         }
 
         return TimeUnit.valueOf(units);
+    }
+
+    public static TimeUnit getTimeUnit(Object units) {
+        if(units instanceof TimeUnit) {
+            return (TimeUnit)units;
+        } else if (units instanceof String) {
+            return cleanUnitsString((String) units);
+        }
+
+        throw new IllegalArgumentException("unable to parse returned time units: " + units.toString());
     }
 }

@@ -60,7 +60,7 @@ public class CassandraAgent extends Agent {
                 }
             }
 
-            metrics.stream().filter(m -> m.getValue() != null && !m.getValue().toString().equals("NaN"))
+            metrics.stream().filter(m -> m != null && m.getValue() != null && !m.getValue().toString().equals("NaN"))
                     .forEach(m -> reportMetric(m.getName(), m.getValueType(), m.getValue()));
         } catch (Exception e) {
             logger.error("Error Polling Cassandra: ", e);
