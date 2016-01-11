@@ -59,6 +59,8 @@ Each of these specified will require connectivity from the plugin.
 
 **note** - The "username" and "password" attributes can be left empty if not using JMX authentication
 
+**note** - The "version" only supports 2 or 3, ignoring minor versions. If none is specified, it will default to 2.
+
 #### Configuring the `newrelic.json` file: 
 
 The `newrelic.json` file also has a provided template in the `config` directory named `newrelic.template.json`.  If you are installing manually, make a copy of this template file and rename it to `newrelic.json` (again, the New Relic Platform Installer will automatically handle this for you).  
