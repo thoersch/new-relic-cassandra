@@ -64,6 +64,7 @@ public class CassandraAgent extends Agent {
                     .forEach(m -> reportMetric(m.getName(), m.getValueType(), m.getValue()));
         } catch (Exception e) {
             logger.error("Error Polling Cassandra: ", e);
+            e.printStackTrace();
         }
     }
 
