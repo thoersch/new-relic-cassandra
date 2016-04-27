@@ -1,9 +1,8 @@
 package com.tylerhoersch.nr.cassandra;
 
+import com.tylerhoersch.nr.cassandra.templates.Cassandra2xMetrics;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectInstance;
@@ -12,7 +11,6 @@ import javax.management.QueryExp;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
