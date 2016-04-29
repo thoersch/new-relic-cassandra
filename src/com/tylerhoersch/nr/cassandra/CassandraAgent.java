@@ -13,7 +13,7 @@ import java.util.Map;
 public class CassandraAgent extends Agent {
     private static final Logger logger = Logger.getLogger(CassandraAgent.class);
     private static final String GUID = "com.tylerhoersch.nr.cassandra";
-    private static final String VERSION = "1.0.0";
+    private static final String VERSION = "1.2.0";
     private final JMXRunnerFactory jmxRunnerFactory;
     private final String name;
     private final List<String> hosts;
@@ -56,7 +56,7 @@ public class CassandraAgent extends Agent {
             	if (instances.get(instance).booleanValue()) {
                 	jmxRunner = jmxRunnerFactory.createJMXRunner(instance, port, username, password);
                     metrics.addAll(getCassandraMetrics(jmxRunner, instance));
-            	}            	
+            	}
             }
 
             metrics.stream().filter(m -> m.getValue() != null && !m.getValue().toString().equals("NaN"))
